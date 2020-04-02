@@ -1,25 +1,26 @@
 <template>
   <div id="app">
-      <PixiContainer/>
+    <PixiContainer />
   </div>
 </template>
 
 <script>
-import PixiContainer from './components/PixiContainer.vue'
+import PixiContainer from "./components/PixiContainer.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
     PixiContainer
   }
-}
+};
 </script>
 
 <style>
-html, body {
-    height: 100vh;
-    width: 100vw;
-    margin: 0;
+html,
+body {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -31,5 +32,4 @@ html, body {
 * {
   box-sizing: border-box;
 }
-
 </style>
