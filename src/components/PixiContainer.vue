@@ -1,8 +1,6 @@
 <template>
   <div class="wrapper">
-    <div class="pixiContainer" ref="pixiCont">
-      <h1>Enter pixi</h1>
-    </div>
+    <div class="pixiContainer" ref="pixiCont"></div>
   </div>
 </template>
 <script>
@@ -20,8 +18,8 @@ export default {
         // width: 256,
         // height: 256
         // transparent: true,
-        // width: this.$refs.pixiCont.clientWidth,
-        // height: this.$refs.pixiCont.clientHeight
+        width: this.$refs.pixiCont.clientWidth,
+        height: this.$refs.pixiCont.clientHeight
       });
       this.$refs.pixiCont.appendChild(this.pixi.view);
 
@@ -70,6 +68,7 @@ export default {
         this.pixi.screen.width,
         this.pixi.screen.height
       );
+      // add container to screen
       this.pixi.stage.addChild(container);
       const filter = new PIXI.Filter(null, shaderFrag, {
         mouse: new PIXI.Point()
@@ -112,6 +111,7 @@ export default {
 .wrapper {
   height: 100%;
   width: 100%;
+  overflow: hidden;
 }
 .pixiContainer {
   border: 3px solid red;
