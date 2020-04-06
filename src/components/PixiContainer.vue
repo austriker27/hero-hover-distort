@@ -5,11 +5,21 @@
 </template>
 <script>
 import * as PIXI from "pixi.js";
+import vec4 from './../vec4.js';
 
 export default {
   name: "PixiContainer",
   mounted() {
     this.init();
+    this.resize();
+    window.addEventListener("resize", this.resize);
+  },
+  data() {
+    return {
+      background: null,
+      filter: null,
+      uniforms: {}
+    }
   },
   methods: {
     init() {
@@ -35,12 +45,18 @@ export default {
 
       this.load();
 
-      const background = PIXI.Sprite.from(
+      this.background = PIXI.Sprite.from(
         "https://images.unsplash.com/photo-1584988291561-39380c93c5b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80"
       );
-      background.width = this.pixi.screen.width;
-      background.height = this.pixi.screen.height;
-      this.pixi.stage.addChild(background);
+
+      this.texture = this.background.texture;
+      this.uniforms = {
+        ...this.uniforms,
+        texture: this.texture
+      }
+      /* this.background.width = this.pixi.screen.width;
+      this.background.height = this.pixi.screen.height;
+      this.pixi.stage.addChild(this.background); */
 
       const shaderFrag = `
         precision highp float;
@@ -51,14 +67,25 @@ export default {
         uniform vec4 inputSize;
         uniform vec4 outputFrame;
         uniform float time;
+        uniform vec4 fit;
+
+        uniform sampler2D texture;
 
         void main() {
-        vec2 screenPos = vTextureCoord * inputSize.xy + outputFrame.xy;
-        if (length(mouse - screenPos) < 25.0) {
-            gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0) * 0.7; //yellow circle, alpha=0.7
-        } else {
-            gl_FragColor = vec4( sin(time), (mouse.xy - outputFrame.xy) / outputFrame.zw, 1.0) * 0.5; // blend with underlying image, alpha=0.5
-        }
+          vec2 screenPos = vTextureCoord * inputSize.xy + outputFrame.xy;
+          if (length(mouse - screenPos) < 25.0) {
+              
+              vec2 uv = vTextureCoord.xy / outputFrame.xy;
+              
+              vec2 dir = normalize(uv - mouse);
+              float d = distance(mouse, uv);
+              float p = 0.01 * (1.0 / (d * d));
+              vec4 c = texture2D(texture, mix(uv, mouse, p));
+              gl_FragColor = c;
+              
+          } else {
+              gl_FragColor = texture2D(texture, vTextureCoord);
+          }
         }
         `;
       // const container = new PIXI.Container();
@@ -70,17 +97,27 @@ export default {
       );
       // add container to screen
       this.pixi.stage.addChild(container);
-      const filter = new PIXI.Filter(null, shaderFrag, {
+      this.uniforms = {
+        ...this.uniforms,
         mouse: new PIXI.Point()
-      });
-      container.filters = [filter];
-
+      }
+      this.filter = new PIXI.Filter(null, shaderFrag, this.uniforms);
+      container.filters = [this.filter];
+      var texture = 
       // Animate the filter
       this.pixi.ticker.add(delta => {
-        filter.uniforms.mouse.copyFrom(
+        this.filter.uniforms.mouse.copyFrom(
           this.pixi.renderer.plugins.interaction.mouse.global
         );
       });
+    },
+    resize() {
+      this.uniforms.fit = new vec4(
+        this.$refs.view.clientWidth,
+        this.$refs.view.clientHeight,
+        1,
+        1
+      );
     },
     // load assets into pixi adn run setup once done
     load() {
@@ -93,14 +130,14 @@ export default {
     //setup function that is called at the end of load
     setup() {
       //Create the image sprite
-      let image = new PIXI.Sprite(
+      /* let image = new PIXI.Sprite(
         PIXI.loader.resources[
           "https://images.unsplash.com/photo-1584988291561-39380c93c5b3?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1267&q=80"
         ].texture
       );
 
       //Add the image to the stage
-      this.pixi.stage.addChild(image);
+      this.pixi.stage.addChild(image); */
     }
   }
 };
