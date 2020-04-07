@@ -5,7 +5,9 @@
 </template>
 <script>
 import * as PIXI from "pixi.js";
-import vec4 from './../vec4.js';
+import vec4 from "./../vec4.js";
+
+import newShader from "raw-loader!../new-shader.frag";
 
 export default {
   name: "PixiContainer",
@@ -19,7 +21,7 @@ export default {
       background: null,
       filter: null,
       uniforms: {}
-    }
+    };
   },
   methods: {
     init() {
@@ -53,7 +55,7 @@ export default {
       this.uniforms = {
         ...this.uniforms,
         texture: this.texture
-      }
+      };
       /* this.background.width = this.pixi.screen.width;
       this.background.height = this.pixi.screen.height;
       this.pixi.stage.addChild(this.background); */
@@ -69,19 +71,41 @@ export default {
         uniform float time;
         uniform vec4 fit;
 
+        uniform float u_speed;
+        uniform float u_mask;
+        uniform float u_time;
+
         uniform sampler2D texture;
 
         void main() {
           vec2 screenPos = vTextureCoord * inputSize.xy + outputFrame.xy;
           if (length(mouse - screenPos) < 25.0) {
               
-              vec2 uv = vTextureCoord.xy / outputFrame.xy;
-              
-              vec2 dir = normalize(uv - mouse);
-              float d = distance(mouse, uv);
-              float p = 0.01 * (1.0 / (d * d));
-              vec4 c = texture2D(texture, mix(uv, mouse, p));
-              gl_FragColor = c;
+                float zoom1 = (2.5  * u_mask ) + 1.0;
+                vec2 uv1 = (vTextureCoord - 0.5) / zoom1 + (0.5 / zoom1);
+                float zoom2 = 1.0;
+                if (u_mask > 0.) {
+                    zoom2 = (0.01 / u_mask ) + 1.0;
+                }
+                vec2 uv2 = (vTextureCoord - 0.5) / zoom2 + (0.5 / zoom2);
+
+                float aspectRatio = outputFrame.x/outputFrame.y;
+                vec2 uvVideo = uv1 * ratio1;
+                vec2 uvVideoDist = uv1 * ratio1;
+                vec2 uvVideo2 = uv2 * ratio2;
+                if (ratio1.x < 1.) {
+                    uvVideo.x += ((1. - ratio1.x) / 2.);
+                }
+                if (ratio1.y < 1.) {
+                    uvVideo.y += ((1. - ratio1.y) / 2.);
+                }
+                if (ratio2.x < 1.) {
+                    uvVideo2.x += ((1. - ratio2.x) / 2.);
+                }
+                if (ratio2.y < 1.) {
+                    uvVideo2.y += ((1. - ratio2.y) / 2.);
+                }
+                
               
           } else {
               gl_FragColor = texture2D(texture, vTextureCoord);
@@ -100,21 +124,21 @@ export default {
       this.uniforms = {
         ...this.uniforms,
         mouse: new PIXI.Point()
-      }
-      this.filter = new PIXI.Filter(null, shaderFrag, this.uniforms);
+      };
+      this.filter = new PIXI.Filter(null, newShader, this.uniforms);
       container.filters = [this.filter];
-      var texture = 
-      // Animate the filter
-      this.pixi.ticker.add(delta => {
-        this.filter.uniforms.mouse.copyFrom(
-          this.pixi.renderer.plugins.interaction.mouse.global
-        );
-      });
+      var texture =
+        // Animate the filter
+        this.pixi.ticker.add(delta => {
+          this.filter.uniforms.mouse.copyFrom(
+            this.pixi.renderer.plugins.interaction.mouse.global
+          );
+        });
     },
     resize() {
       this.uniforms.fit = new vec4(
-        this.$refs.view.clientWidth,
-        this.$refs.view.clientHeight,
+        this.$refs.pixiCont.clientWidth,
+        this.$refs.pixiCont.clientWidth,
         1,
         1
       );
