@@ -19,3 +19,6 @@
 ## EXAMPLE
 - Effect found (here)[http://www.marinimarmi.com/en/]
 - Looks like they are using greensock, no shaders available in JS files
+
+## PIXI NOTES
+- u_mask: increase value to zoom in on picture
