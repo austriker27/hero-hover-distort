@@ -1,5 +1,7 @@
 #define GLSLIFY 1
-varying vec2 vUv;
+
+varying vec2 vTextureCoord;
+
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform vec2 ratio1;
@@ -13,12 +15,12 @@ uniform float u_time;
 
 void main() {
   float zoom1 = (2.5  * u_mask ) + 1.0;
-  vec2 uv1 = (vUv - 0.5) / zoom1 + (0.5 / zoom1);
+  vec2 uv1 = (vTextureCoord - 0.5) / zoom1 + (0.5 / zoom1);
   float zoom2 = 1.0;
   if (u_mask > 0.) {
       zoom2 = (0.01 / u_mask ) + 1.0;
   }
-  vec2 uv2 = (vUv - 0.5) / zoom2 + (0.5 / zoom2);
+  vec2 uv2 = (vTextureCoord - 0.5) / zoom2 + (0.5 / zoom2);
   float aspectRatio = u_resolution.x/u_resolution.y;
   vec2 uvVideo = uv1 * ratio1;
   vec2 uvVideoDist = uv1 * ratio1;
@@ -35,7 +37,7 @@ void main() {
   if (ratio2.y < 1.) {
       uvVideo2.y += ((1. - ratio2.y) / 2.);
   }
-  vec2 uvCircle = vUv;
+  vec2 uvCircle = vTextureCoord;
   uvCircle.y /= aspectRatio;
   vec2 mouse = u_mouse;
   float dist = distance(vec2(mouse.x, mouse.y / aspectRatio), uvCircle.xy);
@@ -47,7 +49,7 @@ void main() {
       holeMove = 0.11 * u_mask;
   }
 
-  vec2 warp = normalize(mouse.xy - vUv.xy) * pow(dist, -1.0) * holeMove;
+  vec2 warp = normalize(mouse.xy - vTextureCoord.xy) * pow(dist, -1.0) * holeMove;
 
   warp.y = -warp.y;
   uvVideoDist = uvVideo + warp;
