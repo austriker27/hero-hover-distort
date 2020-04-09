@@ -1,7 +1,13 @@
 #define GLSLIFY 1
 
+// texture used I think
 varying vec2 vTextureCoord;
 
+// adding from css tricks article:
+uniform vec2 uResolution; // probably same as u_resolution
+uniform float uPointerDown;
+
+// uniforms from javascript (uniforms are variables we pass to the shader via JS)
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform vec2 ratio1;
@@ -9,10 +15,12 @@ uniform vec2 ratio2;
 uniform vec2 u_resolution;
 uniform vec2 u_mouse;
 
+// declaring variables
 uniform float u_speed;
 uniform float u_mask;
 uniform float u_time;
 
+// render the fragment
 void main() {
   float zoom1 = (2.5  * u_mask ) + 1.0;
   vec2 uv1 = (vTextureCoord - 0.5) / zoom1 + (0.5 / zoom1);

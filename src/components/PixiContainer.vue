@@ -26,11 +26,13 @@ export default {
       pixi: null,
       uniforms: {
         u_resolution: new Vector4(500, 500, 1, 1),
+        // u_resolution: new PIXI.Point(width, height),
         ratio1: new PIXI.Point(1, 1),
         ratio2: new PIXI.Point(1, 1),
         u_speed: 0.2,
         u_mask: 0,
         u_time: 0.5,
+        // u_mouse: new PIXI.Point(width, height)
         u_mouse: new PIXI.Point(0.5, 0.5)
       },
       resizeTick: false
@@ -88,11 +90,15 @@ export default {
         // Animate the filter
         this.pixi.ticker.add(delta => {
           this.filter.uniformGroup.uniforms = this.uniforms;
-          /* this.filter.uniforms.u_mouse.copyFrom(
-          this.pixi.renderer.plugins.interaction.mouse.global
-        ); */
+          //   this.filter.uniforms.u_mouse.copyFrom(
+          //     this.pixi.renderer.plugins.interaction.mouse.global
+          //   );
         });
       this.render();
+    },
+    // start listening to mouse event
+    initEvents() {
+      this.app.stage.interactive = true;
     },
     resize() {
       if (!this.resizeTick) {
@@ -120,7 +126,7 @@ export default {
         this.render();
       });
     },
-    // load assets into pixi adn run setup once done
+    // load assets into pixi and run setup once done
     load() {
       this.loader = new PIXI.Loader();
       this.loader.add([
